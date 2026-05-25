@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Home, Table, Scale } from "lucide-react"; 
 import type { FC } from "react";
-import React from "react";
 
 type Props = {};
 
@@ -31,6 +30,13 @@ const Sidebar: FC<Props> = (props) => {
             >
               <Scale size={20} className="text-slate-500" />
               <h6 className="ml-3">Balance Sheet</h6>
+            </Link>
+            <Link
+              to="cashflow-statement"
+              className="flex items-center md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline"
+            >
+              <Scale size={20} className="text-slate-500" />
+              <h6 className="ml-3">Cashflow Statement</h6>
             </Link>
           </div>
         </div>

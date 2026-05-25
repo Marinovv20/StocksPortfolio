@@ -257,7 +257,6 @@ export interface CompanyKeyMetrics {
   debtToEquityTTM: number;
   debtToAssetsTTM: number;
   netDebtToEBITDATTM: number;
-  currentRatioTTM: number;
   interestCoverageTTM: number;
   incomeQualityTTM: number;
   dividendYieldTTM: number;

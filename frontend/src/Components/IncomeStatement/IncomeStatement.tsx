@@ -1,33 +1,58 @@
 import React, { useEffect, useState } from "react";
-import { CompanyIncomeStatement } from "../../company";
+import { CompanyIncomeStatement, CompanyKeyMetrics, CompanyKeyRatios } from "../../company";
 import { useOutletContext } from "react-router";
 import { get } from "http";
 import { getIncomeStatement } from "../../api";
 import Table from "../Table/Table";
+import Spinner from "../Spinner/Spiner";
+import { formatLargeMonetaryNumber, formatRatio } from "../../Helpers/NumberFormating";
 
 
 type Props = {};
 
 const configs = [
-  {
+ {
     label: "Date",
     render: (company: CompanyIncomeStatement) => company.date,
   },
   {
-    label: "Total Revenue",
-    render: (company: CompanyIncomeStatement) => company.revenue,
+    label: "Revenue",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.revenue),
+  },
+  {
+    label: "Cost Of Revenue",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.costOfRevenue),
+  },
+  {
+    label: "Depreciation",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.depreciationAndAmortization),
+  },
+  {
+    label: "Operating Income",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.operatingIncome),
+  },
+  {
+    label: "Income Before Taxes",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.incomeBeforeTax),
   },
   {
     label: "Net Income",
-    render: (company: CompanyIncomeStatement) => company.netIncome,
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.netIncome),
   },
   {
-    label: "Operating Expenses",
-    render: (company: CompanyIncomeStatement) => company.operatingExpenses,
+    label: "Earnings Per Share",
+    render: (company: CompanyIncomeStatement) => formatLargeMonetaryNumber(company.eps),
   },
   {
-    label: "Cost of Revenue",
-    render: (company: CompanyIncomeStatement) => company.costOfRevenue,
+    label: "Income Before Taxes",
+    render: (company: CompanyIncomeStatement) =>
+      formatLargeMonetaryNumber(company.incomeBeforeTax),
   },
 ];
 
@@ -46,7 +71,7 @@ const IncomeStatement = (props: Props) => {
       {incomeStatement ? (
         <Table config={configs} data={incomeStatement} />
       ) : (
-        <h1>Could not find income statement.</h1>
+        <Spinner />
       )}
     </>
   );

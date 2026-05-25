@@ -2,34 +2,46 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import RatioList from "../RatioList/RatioList";
 import { getKeyMetrics } from "../../api";
-import { CompanyKeyMetrics } from "../../company";
+import { CompanyKeyMetrics, CompanyKeyRatios } from "../../company";
+import Spinner from "../Spinner/Spiner";
+import { formatLargeNonMonetaryNumber, formatRatio } from "../../Helpers/NumberFormating";
 
 type Props = {};
 
 const tableConfig = [
   {
     label: "Market Cap",
-    render: (company: CompanyKeyMetrics) => company.marketCap,
-     subTitle: "Total value of all a company's shares of stock",
+    render: (company: CompanyKeyMetrics) =>
+      formatLargeNonMonetaryNumber(company. marketCap),
+    subTitle: "Total value of all a company's shares of stock",
   },
   {
     label: "Current Ratio",
-    render: (company: CompanyKeyMetrics) => company.currentRatioTTM,
+    render: (company: CompanyKeyMetrics) =>
+      formatRatio(company.currentRatioTTM),
     subTitle:
       "Measures the companies ability to pay short term debt obligations",
   },
   {
     label: "Return On Equity",
-    render: (company: CompanyKeyMetrics) => company.returnOnEquityTTM,
+    render: (company: CompanyKeyMetrics) => formatRatio(company.returnOnEquityTTM),
     subTitle:
       "Return on equity is the measure of a company's net income divided by its shareholder's equity",
   },
   {
     label: "Return On Assets",
-    render: (company: CompanyKeyMetrics) => company.returnOnTangibleAssetsTTM,
+    render: (company: CompanyKeyMetrics) =>
+      formatRatio(company.returnOnTangibleAssetsTTM),
     subTitle:
       "Return on assets is the measure of how effective a company is using its assets",
- },
+  },
+  {
+    label: "Graham Number",
+    render: (company: CompanyKeyMetrics) =>
+      formatRatio(company.grahamNumberTTM),
+    subTitle:
+      "This is the upperbouind of the price range that a defensive investor should pay for a stock",
+  },
 ];
 
 
@@ -50,7 +62,7 @@ const CompanyProfile = (props: Props) => {
           <RatioList config={tableConfig} data={companyData} />
         </>
       ) : (
-        <h1>No data found</h1>
+        <Spinner />
       )}
     </>
   );
