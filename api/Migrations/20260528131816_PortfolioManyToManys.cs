@@ -7,7 +7,7 @@
 namespace api.Migrations
 {
     /// <inheritdoc />
-    public partial class Roles : Migration
+    public partial class PortfolioManyToManys : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,12 +15,12 @@ namespace api.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumn: "Id",
-                keyValue: "17b4409a-9739-4213-b7a4-c6cde8fba872");
+                keyValue: "008aaa30-c734-4ceb-8ee7-3fea71651272");
 
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumn: "Id",
-                keyValue: "79f62746-1fc5-460d-9a6f-dc7765900a77");
+                keyValue: "3097b0d5-3d97-45a9-9d66-3c897caae1b9");
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
@@ -50,8 +50,8 @@ namespace api.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "17b4409a-9739-4213-b7a4-c6cde8fba872", null, "Admin", "ADMIN" },
-                    { "79f62746-1fc5-460d-9a6f-dc7765900a77", null, "User", "USER" }
+                    { "008aaa30-c734-4ceb-8ee7-3fea71651272", null, "User", "USER" },
+                    { "3097b0d5-3d97-45a9-9d66-3c897caae1b9", null, "Admin", "ADMIN" }
                 });
         }
     }
