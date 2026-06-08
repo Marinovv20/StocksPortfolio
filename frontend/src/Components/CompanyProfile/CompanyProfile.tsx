@@ -6,6 +6,7 @@ import { CompanyKeyMetrics, CompanyKeyRatios } from "../../company";
 import Spinner from "../Spinner/Spiner";
 import { formatLargeNonMonetaryNumber, formatRatio } from "../../Helpers/NumberFormating";
 import StockComment from "../StockComment/StockComment";
+import Chatbot from "../Chatbot/Chatbot";
 
 type Props = {};
 
@@ -61,6 +62,7 @@ const CompanyProfile = (props: Props) => {
       {companyData ? (
         <>
           <RatioList config={tableConfig} data={companyData} />
+          <Chatbot stockSymbol={ticker} />
           <StockComment stockSymbol={ticker} />
         </>
       ) : (
