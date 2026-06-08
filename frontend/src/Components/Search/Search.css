@@ -1,0 +1,116 @@
+.search-modern-section {
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  padding: 60px 20px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.search-modern-container {
+  max-width: 800px;
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 50px 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 2px solid #10b981;
+}
+
+.search-modern-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.search-modern-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.search-modern-header p {
+  font-size: 1.1rem;
+  color: #d1fae5;
+  line-height: 1.6;
+}
+
+.search-modern-form {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.search-modern-input {
+  flex: 1;
+  padding: 16px 20px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "Poppins", sans-serif;
+  background: #ffffff;
+  color: #1f2937;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.search-modern-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-modern-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.search-modern-btn {
+  padding: 16px 35px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+  white-space: nowrap;
+}
+
+.search-modern-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+}
+
+.search-modern-btn:active {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .search-modern-container {
+    padding: 30px 20px;
+  }
+
+  .search-modern-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .search-modern-header p {
+    font-size: 0.95rem;
+  }
+
+  .search-modern-form {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .search-modern-input,
+  .search-modern-btn {
+    width: 100%;
+    padding: 14px 16px;
+  }
+}

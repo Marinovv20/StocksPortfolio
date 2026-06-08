@@ -1,0 +1,121 @@
+.card-modern-portfolio {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  border-top: 5px solid #10b981;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card-modern-portfolio:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: #10b981;
+}
+
+.card-modern-header {
+  text-align: center;
+}
+
+.card-modern-symbol {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #10b981;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.card-modern-company {
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.card-modern-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 25px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+  border-radius: 12px;
+  border: 2px solid #10b981;
+}
+
+.price-label {
+  font-size: 0.85rem;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.price-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.card-modern-link {
+  display: inline-block;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #10b981;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid #10b981;
+  font-size: 0.95rem;
+}
+
+.card-modern-link:hover {
+  background: #10b981;
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.card-modern-delete {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.card-modern-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+.card-modern-delete:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .card-modern-portfolio {
+    padding: 20px;
+  }
+
+  .card-modern-symbol {
+    font-size: 2rem;
+  }
+
+  .card-modern-price {
+    padding: 20px;
+  }
+
+  .price-value {
+    font-size: 2rem;
+  }
+}

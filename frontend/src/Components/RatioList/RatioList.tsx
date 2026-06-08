@@ -1,3 +1,5 @@
+import "./RatioList.css";
+
 type Props = {
   config: any;
   data: any;

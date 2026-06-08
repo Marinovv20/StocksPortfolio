@@ -1,26 +1,39 @@
-import React, { SyntheticEvent } from 'react'
-import DeletePortfolio from '../DeletePortfolio/DeletePortfolio';
+import React from 'react'
 import { Link } from 'react-router-dom';
 import { PortfolioGet } from '../../../Models/Portfolio';
+import './CardPortfolio.css'
 
 interface Props {
   portfolioValue: PortfolioGet;
-  onPortfolioDelete: (e: SyntheticEvent) => void;
+  onPortfolioDelete: (symbol: string) => void;
 }
 
 const CardPortfolio = ({ portfolioValue, onPortfolioDelete }: Props) => {
   return (
-    <div className="flex flex-col w-full p-8 space-y-4 text-center rounded-lg shadow-lg md:w-1/3">
-      <Link
+    <div className="card-modern-portfolio">
+      <div className="card-modern-header">
+        <div className="card-modern-symbol">{portfolioValue.symbol}</div>
+        <div className="card-modern-company">{portfolioValue.companyName}</div>
+      </div>
+      
+      <div className="card-modern-price">
+        <span className="price-label">Current Price</span>
+        <span className="price-value">${portfolioValue.purchase.toFixed(2)}</span>
+      </div>
+
+      <Link 
         to={`/company/${portfolioValue.symbol}/company-profile`}
-        className="pt-6 text-xl font-bold"
+        className="card-modern-link"
       >
-        {portfolioValue.symbol}
+        View Details →
       </Link>
-      <DeletePortfolio
-        portfolioValue={portfolioValue.symbol}
-        onPortfolioDelete={onPortfolioDelete}
-      />
+
+      <button 
+        onClick={() => onPortfolioDelete(portfolioValue.symbol)}
+        className="card-modern-delete"
+      >
+        Remove from Portfolio
+      </button>
     </div>
   );
 };

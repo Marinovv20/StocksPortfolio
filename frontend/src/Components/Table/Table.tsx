@@ -1,3 +1,5 @@
+import "./Table.css";
+
 type Props = {
   config: any;
   data: any;

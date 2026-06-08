@@ -52,15 +52,14 @@ const SearchPage = (props: Props) => {
       });
   };
 
-  const onPortfolioDelete = (e: any) => {
-    e.preventDefault();
-    portfolioDeleteAPI(e.target[0].value).then((res) => {
-      if (res?.status == 200) {
-        toast.success("Stock deleted from portfolio!");
-        getPortfolio();
-      }
-    });
-  };
+  const onPortfolioDelete = (symbol: string) => {
+  portfolioDeleteAPI(symbol).then((res) => {
+    if (res?.status == 200) {
+      toast.success("Stock deleted from portfolio!");
+      getPortfolio();
+    }
+  });
+};
 
   const onSearchSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -72,7 +71,7 @@ const SearchPage = (props: Props) => {
       setSearchResult(result.data);
     }
   };
-  return (
+  return (  
     <>
       <Search
         onSearchSubmit={onSearchSubmit}

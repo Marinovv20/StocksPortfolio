@@ -9,45 +9,36 @@ interface Props {}
 const Navbar = (props: Props) => {
   const { isLoggedIn, user, logout } = useAuth();
   return (
-    <nav className="relative container mx-auto p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-20">
-          <Link to="/">
-            <img
-              src={logo}
-              alt="Vals Logo"
-              className="h-20 w-auto"
-            />
+    <nav className="navbar-modern">
+      <div className="navbar-modern-container">
+        <div className="navbar-modern-left">
+          <Link to="/" className="navbar-modern-logo">
+            <img src={logo} alt="Vals Logo" className="navbar-modern-img" />
+            <span className="navbar-modern-brand">VALS</span>
           </Link>
-          <div className="hidden font-bold lg:flex">
-            <Link to="/search" className="text-black hover:text-darkBlue">
-              Search
-            </Link>
-          </div>
+          <Link to="/search" className="navbar-modern-link">
+            Search
+          </Link>
         </div>
-        {isLoggedIn() ? (
-          <div className="hidden lg:flex items-center space-x-6 text-back">
-            <div className="hover:text-darkBlue">Welcome, {user?.userName}</div>
-            <a
-              onClick={logout}
-              className="px-8 py-3 font-bold rounded text-white bg-lightGreen hover:opacity-70"
-            >
-              Logout
-            </a>
-          </div>
-        ) : (
-          <div className="hidden lg:flex items-center space-x-6 text-back">
-            <Link to="/login" className="hover:text-darkBlue">
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-8 py-3 font-bold rounded text-white bg-lightGreen hover:opacity-70"
-            >
-              Signup
-            </Link>
-          </div>
-        )}
+        <div className="navbar-modern-right">
+          {isLoggedIn() ? (
+            <>
+              <span className="navbar-modern-user">Welcome, {user?.userName}</span>
+              <button onClick={logout} className="navbar-modern-btn logout">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="navbar-modern-link">
+                Login
+              </Link>
+              <Link to="/register" className="navbar-modern-btn signup">
+                Signup
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
