@@ -96,7 +96,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
-
+builder.Services.AddHttpClient("HuggingFaceClient", client =>
+{
+    client.BaseAddress = new Uri("https://router.huggingface.co/");
+});
 builder.Services.AddScoped<IFMPService, FMPService>();
 builder.Services.AddHttpClient<IFMPService, FMPService>();
 

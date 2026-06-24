@@ -33,34 +33,47 @@ const Chatbot: React.FC<Props> = ({ stockSymbol }) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // Add user message
+    // 1. Instantly instantiate and register user's question locally
     const userMessage: ChatMessage = {
       id: uuid(),
       role: "user",
       content: input,
       timestamp: new Date(),
     };
+    
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    // Get bot response
-    const response = await chatbotAskAPI(stockSymbol, input);
-    setLoading(false);
+    try {
+      const response = await chatbotAskAPI(stockSymbol, input);
+      setLoading(false);
 
-    if (response) {
-      const botMessage: ChatMessage = {
-        id: uuid(),
-        role: "bot",
-        content: `${response.message}\n\n📊 Recommendation: ${response.recommendation}\n💰 Current Price: $${response.currentPrice}\n\nReasoning: ${response.reasoning}`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    } else {
+      if (response) {
+        const botMessage: ChatMessage = {
+          id: uuid(),
+          role: "bot",
+          content: `${response.message}\n\n📊 Recommendation: ${response.recommendation}\n💰 Current Price: $${response.currentPrice}\n\nReasoning:\n${response.reasoning}`,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uuid(),
+            role: "bot",
+            content: "Sorry, I received an empty analysis payload. Please verify your asset data ticker.",
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } catch (error) {
+      setLoading(false);
       const errorMessage: ChatMessage = {
         id: uuid(),
         role: "bot",
-        content: "Sorry, I couldn't process your request. Please try again.",
+        content: "Sorry, I couldn't process your request right now. Please check your network connection.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -78,7 +91,8 @@ const Chatbot: React.FC<Props> = ({ stockSymbol }) => {
             key={msg.id}
             className={`chatbot-message ${msg.role}`}
           >
-            <div className="message-content">
+            {}
+            <div className="message-content" style={{ whiteSpace: "pre-line" }}>
               {msg.content}
             </div>
             <small className="message-time">

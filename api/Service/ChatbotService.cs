@@ -1,179 +1,132 @@
-using api.Interfaces;
-using api.Models;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using api.Dtos.Chat;
+using api.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace api.Service
 {
     public class ChatbotService : IChatbotService
     {
-        private readonly IStockRepository _stockRepo;
+        private readonly IHttpClientFactory _clientFactory; 
         private readonly IFMPService _fmpService;
+        private readonly string _apiKey;
+        private readonly string _model;
 
-        public ChatbotService(IStockRepository stockRepo, IFMPService fmpService)
+        public ChatbotService(IHttpClientFactory clientFactory, IFMPService fmpService, IConfiguration config)
         {
-            _stockRepo = stockRepo;
+            _clientFactory = clientFactory;
             _fmpService = fmpService;
+            _apiKey = config["HuggingFace:ApiKey"] ?? string.Empty;
+            _model = config["HuggingFace:Model"] ?? "meta-llama/Llama-3.2-3B-Instruct";
         }
 
         public async Task<ChatResponseDto> GetAdviceAsync(string symbol, string question)
         {
-            var stock = await _stockRepo.GetBySymbolAsync(symbol);
-            
-            if (stock == null)
-            {
-                stock = await _fmpService.FindStockBySymbolAsync(symbol);
-            }
+            string stockContext = "No additional financial data available.";
+            decimal currentPrice = 0;
 
-            if (stock == null)
+            try
             {
-                return new ChatResponseDto
+                var stock = await _fmpService.FindStockBySymbolAsync(symbol);
+                if (stock != null)
                 {
-                    Symbol = symbol,
-                    Message = $"Stock {symbol} not found.",
-                    Recommendation = "N/A",
-                    Reasoning = "Stock not found in database"
-                };
+                    currentPrice = stock.Purchase; 
+                    stockContext = $"Company: {stock.CompanyName}, Industry: {stock.Industry}, Current Price: ${stock.Purchase}, Market Cap: {stock.MarketCap}, Symbol: {stock.Symbol}";
+                }
+            }
+            catch (Exception ex)
+            {
+                stockContext = $"Could not load real-time metrics due to: {ex.Message}";
             }
 
-            var score = CalculateInvestmentScore(stock);
-            var recommendation = DetermineRecommendation(score);
-            var reasoning = GenerateReasoning(stock, score);
+            string systemPrompt = 
+                "You are an expert financial advisor AI. You analyze stock metrics and provide data in a strict JSON format.\n" +
+                "You must respond ONLY with a raw JSON object matching this structure:\n" +
+                "{\n" +
+                "  \"message\": \"A short conversational greeting or summary answering the user's explicit question directly\",\n" +
+                "  \"recommendation\": \"BUY, SELL, or HOLD\",\n" +
+                "  \"currentPrice\": 0.00,\n" +
+                "  \"reasoning\": \"A single string containing your explanation, using \\n for line breaks between points. NOT an array.\"\n" +
+                "}\n" +
+                "Do not include any markdown styling code-blocks (like ```json) or chat pleasantries outside of the JSON block.";
 
+            string userPrompt = $"Context data for {symbol}:\n{stockContext}\n\nUser Question: {question}";
+
+            string endpoint = "https://router.huggingface.co/v1/chat/completions";
+
+            var openAiStylePayload = new
+            {
+                model = "Qwen/Qwen2.5-7B-Instruct:fastest",
+                messages = new[]
+                {
+                    new { role = "system", content = systemPrompt },
+                    new { role = "user", content = userPrompt }
+                },
+                max_tokens = 500,
+                temperature = 0.7
+            };
+
+            var hfClient = _clientFactory.CreateClient("HuggingFaceClient");
+            string jsonPayload = JsonSerializer.Serialize(openAiStylePayload);
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(endpoint));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var response = await hfClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorBody = await response.Content.ReadAsStringAsync();
+                    return CreateFallbackResponse(symbol, currentPrice, $"HF error {response.StatusCode}: {errorBody}");
+                }
+
+                string rawResponse = await response.Content.ReadAsStringAsync();
+                using var jsonDoc = JsonDocument.Parse(rawResponse);
+                
+                string aiJsonOutput = jsonDoc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString()?.Trim() ?? string.Empty;
+
+                if (aiJsonOutput.StartsWith("```"))
+                {
+                    aiJsonOutput = aiJsonOutput.Replace("```json", "").Replace("```", "").Trim();
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var chatResponse = JsonSerializer.Deserialize<ChatResponseDto>(aiJsonOutput, options);
+
+                if (chatResponse != null)
+                {
+                    if (chatResponse.CurrentPrice == 0) chatResponse.CurrentPrice = currentPrice;
+                    return chatResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                return CreateFallbackResponse(symbol, currentPrice, $"Failed to analyze context metrics: {ex.Message}");
+            }
+
+            return CreateFallbackResponse(symbol, currentPrice, "Failed to parse structured AI output tokens.");
+        }
+
+        private ChatResponseDto CreateFallbackResponse(string symbol, decimal price, string genericMessage)
+        {
             return new ChatResponseDto
             {
-                Symbol = symbol,
-                Message = $"Analysis for {stock.CompanyName} ({symbol})",
-                Recommendation = recommendation,
-                CurrentPrice = stock.Purchase,
-                Reasoning = reasoning
+                Message = $"Reviewing details for {symbol}.",
+                Recommendation = "HOLD",
+                CurrentPrice = price,
+                Reasoning = genericMessage
             };
-        }
-
-        private int CalculateInvestmentScore(Stock stock)
-        {
-            int score = 50;
-
-            // Market Cap
-            if (stock.MarketCap > 500_000_000_000)
-                score += 25;
-            else if (stock.MarketCap > 100_000_000_000)
-                score += 20;
-            else if (stock.MarketCap > 50_000_000_000)
-                score += 15;
-            else if (stock.MarketCap > 10_000_000_000)
-                score += 10;
-            else if (stock.MarketCap > 2_000_000_000)
-                score += 5;
-            else if (stock.MarketCap > 500_000_000)
-                score -= 10;
-            else if (stock.MarketCap > 100_000_000)
-                score -= 15;
-            else
-                score -= 25;
-
-            // Dividend
-            if (stock.LastDiv > 0.50m)
-                score += 15;
-            else if (stock.LastDiv > 0.20m)
-                score += 10;
-            else if (stock.LastDiv > 0.01m)
-                score += 5;
-            else
-                score -= 5;
-
-            // Industry
-            score += AnalyzeIndustry(stock.Industry);
-
-            // Valuation
-            score += AnalyzeValuation(stock);
-
-            return Math.Max(0, Math.Min(100, score));
-        }
-
-        private int AnalyzeIndustry(string industry)
-        {
-            if (string.IsNullOrEmpty(industry))
-                return 0;
-
-            var ind = industry.ToLower();
-
-            if (ind.Contains("utility") || ind.Contains("healthcare") || ind.Contains("pharmaceutical") || ind.Contains("consumer staples"))
-                return 8;
-            if (ind.Contains("technology") || ind.Contains("software") || ind.Contains("semiconductor") || ind.Contains("cloud"))
-                return 5;
-            if (ind.Contains("financial") || ind.Contains("banking") || ind.Contains("insurance"))
-                return 3;
-            if (ind.Contains("mining") || ind.Contains("oil") || ind.Contains("energy"))
-                return -5;
-            if (ind.Contains("crypto") || ind.Contains("gambling") || ind.Contains("penny stock"))
-                return -10;
-
-            return 0;
-        }
-
-        private int AnalyzeValuation(Stock stock)
-        {
-            if (stock.Purchase < 50 && stock.MarketCap > 5_000_000_000)
-                return 5;
-            if (stock.Purchase > 500 && stock.MarketCap < 10_000_000_000)
-                return -5;
-            return 0;
-        }
-
-        private string DetermineRecommendation(int score)
-        {
-            if (score >= 75)
-                return "STRONG BUY 🚀";
-            else if (score >= 60)
-                return "BUY 📈";
-            else if (score >= 40)
-                return "HOLD ⏸️";
-            else if (score >= 25)
-                return "SELL 📉";
-            else
-                return "STRONG SELL ⛔";
-        }
-
-        private string GenerateReasoning(Stock stock, int score)
-        {
-            var factors = new List<string>();
-
-            if (stock.MarketCap > 100_000_000_000)
-                factors.Add("✅ Large market cap = stable company");
-            else if (stock.MarketCap < 500_000_000)
-                factors.Add("⚠️ Small market cap = higher risk");
-
-            if (stock.LastDiv > 0.50m)
-                factors.Add($"✅ Strong dividend yield ({stock.LastDiv:F2}) = good income");
-            else if (stock.LastDiv > 0.01m)
-                factors.Add($"📊 Dividend paid ({stock.LastDiv:F2}) = income stock");
-            else
-                factors.Add("📈 No dividend = likely a growth stock");
-
-            if (stock.Industry.Contains("Technology", StringComparison.OrdinalIgnoreCase))
-                factors.Add("🔬 Tech sector = growth potential but volatile");
-            else if (stock.Industry.Contains("Healthcare", StringComparison.OrdinalIgnoreCase))
-                factors.Add("🏥 Healthcare = defensive and stable");
-            else if (stock.Industry.Contains("Utility", StringComparison.OrdinalIgnoreCase))
-                factors.Add("⚡ Utility = low risk, steady income");
-
-            if (stock.Purchase < 50)
-                factors.Add("💰 Affordable price point = accessible for most");
-            else if (stock.Purchase > 500)
-                factors.Add("💎 Premium price = likely high quality");
-
-            if (score >= 75)
-                factors.Add("🎯 Overall: Excellent fundamentals detected!");
-            else if (score >= 60)
-                factors.Add("👍 Overall: Good investment opportunity");
-            else if (score >= 40)
-                factors.Add("⏸️ Overall: Maintain current position or monitor");
-            else if (score >= 25)
-                factors.Add("⚠️ Overall: Consider reducing exposure");
-            else
-                factors.Add("🚫 Overall: Significant risks identified");
-
-            return string.Join("\n", factors);
         }
     }
 }

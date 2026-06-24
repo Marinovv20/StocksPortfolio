@@ -60,12 +60,19 @@ const IncomeStatement = (props: Props) => {
   const ticker = useOutletContext<string>();
   const [incomeStatement, setIncomeStatement] = useState<CompanyIncomeStatement[]>();
   useEffect(() => {
-    const incomeStatementFetch = async () => {
+  const incomeStatementFetch = async () => {
+    if (!ticker) return;
+      try {
       const result = await getIncomeStatement(ticker);
-      setIncomeStatement(result!.data);
-    };
-    incomeStatementFetch();
-  }, []);
+      if (result && (result as any).data) setIncomeStatement((result as any).data);
+      else setIncomeStatement([]); 
+      } catch (e) {
+      console.error("Income statement fetch failed", e);
+      setIncomeStatement([]);
+    }
+  };
+  incomeStatementFetch();
+  }, [ticker]);
    return (
     <>
       {incomeStatement ? (
